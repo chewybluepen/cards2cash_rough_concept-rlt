@@ -1,5 +1,5 @@
 import { IStorage } from "./types";
-import { User, InsertUser, VirtualCard, Transaction } from "@shared/schema";
+import { User, InsertUser, VirtualCard, Transaction, Notification } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { nanoid } from "nanoid";
@@ -70,10 +70,32 @@ const mockVirtualCards: VirtualCard[] = [
   }
 ];
 
+const mockNotifications: Notification[] = [
+  {
+    id: 1,
+    userId: 1,
+    type: "TRANSACTION",
+    title: "Fund Load Successful",
+    message: "Your account has been credited with 500.00 GYD",
+    isRead: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2)
+  },
+  {
+    id: 2,
+    userId: 1,
+    type: "SECURITY",
+    title: "New Virtual Card Created",
+    message: "A new virtual card has been generated with amount 200.00 GYD",
+    isRead: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24)
+  }
+];
+
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private virtualCards: Map<number, VirtualCard>;
   private transactions: Map<number, Transaction>;
+  private notifications: Map<number, Notification>;
   private currentIds: { [key: string]: number };
   sessionStore: session.Store;
 
@@ -82,11 +104,13 @@ export class MemStorage implements IStorage {
     this.users = new Map([[mockUser.id, mockUser]]);
     this.virtualCards = new Map(mockVirtualCards.map(card => [card.id, card]));
     this.transactions = new Map(mockTransactions.map(tx => [tx.id, tx]));
+    this.notifications = new Map(mockNotifications.map(notif => [notif.id, notif]));
 
     this.currentIds = {
       users: Math.max(...this.users.keys()) + 1,
       virtualCards: Math.max(...this.virtualCards.keys()) + 1,
-      transactions: Math.max(...this.transactions.keys()) + 1
+      transactions: Math.max(...this.transactions.keys()) + 1,
+      notifications: Math.max(...this.notifications.keys()) + 1
     };
 
     this.sessionStore = new MemoryStore({
@@ -155,6 +179,36 @@ export class MemStorage implements IStorage {
     return Array.from(this.transactions.values())
       .filter((tx) => tx.userId === userId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async getNotificationsByUser(userId: number): Promise<Notification[]> {
+    return Array.from(this.notifications.values())
+      .filter((notif) => notif.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async markNotificationAsRead(id: number): Promise<Notification> {
+    const notification = this.notifications.get(id);
+    if (!notification) throw new Error("Notification not found");
+
+    const updatedNotification = {
+      ...notification,
+      isRead: true
+    };
+    this.notifications.set(id, updatedNotification);
+    return updatedNotification;
+  }
+
+  async createNotification(notification: Omit<Notification, "id" | "createdAt" | "isRead">): Promise<Notification> {
+    const id = this.currentIds.notifications++;
+    const newNotification: Notification = {
+      ...notification,
+      id,
+      isRead: false,
+      createdAt: new Date()
+    };
+    this.notifications.set(id, newNotification);
+    return newNotification;
   }
 }
 

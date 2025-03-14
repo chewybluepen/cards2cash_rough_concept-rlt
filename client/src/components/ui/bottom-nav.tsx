@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Wallet, CreditCard, ArrowRightLeft, MoreHorizontal, LogOut, History, TrendingUp, HelpCircle, Building2, Shield } from "lucide-react";
+import { Home, Wallet, CreditCard, ArrowRightLeft, MoreHorizontal, LogOut, History, TrendingUp, HelpCircle, Building2, Shield, Bell } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "./button";
 import {
@@ -23,6 +23,7 @@ export function BottomNav() {
 
   // Secondary items moved to More menu
   const secondaryLinks = [
+    { href: "/notifications", icon: Bell, label: "Notifications" },
     { href: "/transactions", icon: History, label: "History" },
     { href: "/monthly-growth", icon: TrendingUp, label: "Growth" },
     { href: "/help", icon: HelpCircle, label: "Help" },

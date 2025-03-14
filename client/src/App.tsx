@@ -14,6 +14,7 @@ import MonthlyGrowth from "@/pages/monthly-growth";
 import Help from "@/pages/help";
 import BankConnection from "@/pages/bank-connection";
 import SpendingLimits from "@/pages/spending-limits";
+import Notifications from "@/pages/notifications";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -29,6 +30,7 @@ function Router() {
       <ProtectedRoute path="/help" component={Help} />
       <ProtectedRoute path="/bank-connection" component={BankConnection} />
       <ProtectedRoute path="/spending-limits" component={SpendingLimits} />
+      <ProtectedRoute path="/notifications" component={Notifications} />
       <Route component={NotFound} />
     </Switch>
   );

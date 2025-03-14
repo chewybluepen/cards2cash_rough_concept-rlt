@@ -32,6 +32,16 @@ export const transactions = pgTable("transactions", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  type: text("type").notNull(), // 'TRANSACTION', 'SECURITY', 'SYSTEM'
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -47,7 +57,14 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
   createdAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+  isRead: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type VirtualCard = typeof virtualCards.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
