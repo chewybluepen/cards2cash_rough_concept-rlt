@@ -51,6 +51,9 @@ export default function AuthPage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-center">Cards2Cash</CardTitle>
+            <p className="text-center text-sm text-gray-600 mt-2">
+              The Future of Your Finances, for a Borderless World
+            </p>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
