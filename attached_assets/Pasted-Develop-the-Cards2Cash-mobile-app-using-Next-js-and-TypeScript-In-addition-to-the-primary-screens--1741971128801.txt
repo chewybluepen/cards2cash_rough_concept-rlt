@@ -1,0 +1,150 @@
+Develop the Cards2Cash mobile app using Next.js and TypeScript. In addition to the primary screens (e.g., login, dashboard, etc.), you must implement every secondary, tertiary, and quaternary screen, page, and clickable link as outlined below. This includes all nested routes (such as dynamic detail pages and loading states) and auxiliary screens. Each item should be built with clear navigation and annotated decision points where necessary.
+
+Primary (Base) Screens
+These screens form the main entry points and layout of the app:
+
+Main Layout & Global Files:
+app/layout.tsx – Global layout with navigation (sidebars, bottom nav, headers) for the entire app.
+app/page.tsx – Home/Landing page (typically the dashboard after login).
+app/globals.css – Global styles.
+Error & Fallback Screens:
+app/error.tsx – Generic error display.
+app/not-found.tsx – “Not Found” page for unknown routes.
+Secondary Screens (First-Level Routes)
+Funds Management
+Add Funds Main:
+app/add-funds/page.tsx – Screen for initiating fund additions.
+Bank & Payment Methods
+Bank Connection:
+app/bank-connection/page.tsx – Screen for linking a bank account.
+Payment Methods:
+app/payment-methods/page.tsx – Lists user’s saved payment methods.
+Currency Conversion
+Convert Main:
+app/convert/page.tsx – Screen for converting funds between currencies.
+User Dashboard & Analytics
+Dashboard:
+app/dashboard/page.tsx – Displays account overview, current balance (GYD), and quick actions.
+Monthly Growth:
+app/monthly-growth/page.tsx – Shows spending/income trends via visual analytics.
+Authentication & Security
+Biometric Authentication:
+app/biometric-auth/page.tsx – Setup and verify biometric login.
+Change Password:
+app/change-password/page.tsx – Screen to update user password.
+Forgot Password:
+app/forgot-password/page.tsx – Initiates password reset.
+Two-Factor Authentication:
+app/two-factor/page.tsx – 2FA setup and management.
+Verify OTP:
+app/verify-otp/page.tsx – Screen for entering a one-time password.
+Facial Recognition Setup:
+app/facial-recognition-setup/page.tsx – Walkthrough for facial recognition authentication.
+Communication & Support
+Chat:
+app/chat/page.tsx – Interface for live support or community chat.
+Help:
+app/help/page.tsx – FAQs, guides, and support information.
+Card & Demo
+Generate Card:
+app/generate-card/page.tsx – Screen to generate virtual cards.
+Demo Success:
+app/demo-success/page.tsx – Confirmation screen for successful demo transactions.
+User Profile & Settings
+Profile Overview:
+app/profile/page.tsx – Displays personal details and account settings.
+Settings:
+app/settings/page.tsx – Central hub for user preferences.
+Language:
+app/language/page.tsx – Screen to select the app language.
+Spending Limits:
+app/spending-limits/page.tsx – Interface for setting daily/transaction limits.
+Terms & Conditions:
+app/terms/page.tsx – Legal and regulatory documentation.
+Notifications, Offers, Rewards & Transactions
+Notifications Overview:
+app/notifications/page.tsx – List of account alerts and notifications.
+Offers Overview:
+app/offers/page.tsx – Displays partner discounts and special offers.
+Rewards Overview:
+app/rewards/page.tsx – Shows loyalty rewards and benefits.
+Transactions Overview:
+app/transactions/page.tsx – Lists all past transactions with filtering options.
+Savings:
+app/savings/page.tsx – Screen to view or manage savings.
+Tertiary Screens (Nested Under Secondary Routes)
+Add Funds Flow
+Funds History:
+app/add-funds/history/page.tsx – Log of previous funds added.
+Loading State:
+app/add-funds/history/loading.tsx – Visual indicator while loading history data.
+Funds Rates:
+app/add-funds/rates/page.tsx – Displays conversion rates and fees before adding funds.
+Bank Connection Auxiliary
+Loading State:
+app/bank-connection/loading.tsx – Shows progress while verifying bank details.
+Currency Conversion Details
+Currency Details:
+app/convert/currency-details/page.tsx – Detailed view of conversion rates, fees, and other related info.
+Conversion History:
+app/convert/history/page.tsx – List of previous currency conversion transactions.
+Loading State:
+app/convert/history/loading.tsx – Indicator while conversion history data is fetched.
+Help Flow
+Help Loading:
+app/help/loading.tsx – Visual state while help content is being retrieved.
+Notifications Detail
+Notification Detail:
+app/notifications/[id]/page.tsx – Dynamic page showing full details for a specific notification.
+Offers Detail
+Offer Detail:
+app/offers/[id]/page.tsx – Dynamic page with detailed offer information.
+Offers Loading:
+app/offers/loading.tsx – Visual indicator for loading offers data.
+Payment Methods Additions
+Add Bank:
+app/payment-methods/add-bank/page.tsx – Form to add a new bank account.
+Add Card:
+app/payment-methods/add-card/page.tsx – Form to add a new debit/credit card.
+Profile Auxiliary
+Avatar Update:
+app/profile/avatar/page.tsx – Interface for updating the profile picture.
+Security Questions:
+app/profile/security-questions/page.tsx – Screen to set or update account recovery questions.
+Rewards Details
+Reward Detail:
+app/rewards/[id]/page.tsx – Dynamic page displaying detailed information on a selected reward.
+Tier Benefits:
+app/rewards/tier-benefits/page.tsx – Lists benefits available at various reward tiers.
+Transactions Detail
+Transaction Detail:
+app/transactions/[id]/page.tsx – Dynamic page for a detailed view of an individual transaction.
+Transactions Loading:
+app/transactions/loading.tsx – Indicator while transaction data is being loaded.
+Quaternary Screens (Deeply Nested / Dynamic Routes)
+The quaternary level is represented by dynamic route segments within tertiary pages:
+
+Dynamic Detail Pages:
+app/notifications/[id]/page.tsx – For each individual notification.
+app/offers/[id]/page.tsx – For each specific offer.
+app/rewards/[id]/page.tsx – For each reward item.
+app/transactions/[id]/page.tsx – For detailed transaction information.
+Each of these dynamic pages should include navigation links back to their parent list (e.g., notifications, offers, rewards, or transactions) and clearly display context-specific details along with annotated decision points (such as “User selects notification to view details”).
+
+Implementation Requirements & Annotations
+Navigation & Link Structure:
+
+Ensure that every screen (secondary, tertiary, and quaternary) includes clickable links or buttons that allow users to navigate between parent and child screens seamlessly.
+Annotate decision points (e.g., “User confirms card generation” or “User receives OTP via SMS”) directly in the UI code or comments.
+Loading & Error States:
+
+Implement loading components for history, conversion, bank connection, help, transactions, and offers to give feedback during asynchronous data fetches.
+Provide clear error messages and recovery options on all screens when operations fail (e.g., “Invalid Code – please retry or contact support”).
+Responsive & Consistent UI:
+
+Use shared UI components (buttons, modals, toasts, etc.) from the components/ui/ directory to ensure a consistent experience.
+The navigation (sidebars, bottom nav, breadcrumbs) should be implemented using components like components/bottom-navigation.tsx and components/navigation-menu.tsx.
+Documentation & Code Comments:
+
+Include inline comments and annotations explaining the purpose of each screen and the decision points within user flows.
+Clearly document each nested route’s functionality and how it ties into the overall user journey.

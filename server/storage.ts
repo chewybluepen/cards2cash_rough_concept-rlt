@@ -6,6 +6,70 @@ import { nanoid } from "nanoid";
 
 const MemoryStore = createMemoryStore(session);
 
+// Mock data for initial testing
+const mockUser: User = {
+  id: 1,
+  username: "demo@mail.com",
+  password: "password123",
+  balance: "1250.00",
+  currency: "GYD"
+};
+
+const mockTransactions: Transaction[] = [
+  {
+    id: 1,
+    userId: 1,
+    type: "PREPAID_LOAD",
+    amount: "500.00",
+    currency: "GYD",
+    description: "Prepaid code load: GY123456789",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2) // 2 days ago
+  },
+  {
+    id: 2,
+    userId: 1,
+    type: "CARD_GENERATION",
+    amount: "200.00",
+    currency: "GYD",
+    description: "Virtual card generated: 4532",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24) // 1 day ago
+  },
+  {
+    id: 3,
+    userId: 1,
+    type: "CONVERSION",
+    amount: "100.00",
+    currency: "GYD",
+    description: "Converted 100.00 GYD to 0.48 USD",
+    createdAt: new Date() // Today
+  }
+];
+
+const mockVirtualCards: VirtualCard[] = [
+  {
+    id: 1,
+    userId: 1,
+    cardNumber: "4532123456781234",
+    expiryDate: "03/25",
+    cvv: "123",
+    amount: "200.00",
+    currency: "GYD",
+    isActive: true,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24)
+  },
+  {
+    id: 2,
+    userId: 1,
+    cardNumber: "4532123456789012",
+    expiryDate: "03/25",
+    cvv: "456",
+    amount: "150.00",
+    currency: "GYD",
+    isActive: true,
+    createdAt: new Date()
+  }
+];
+
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private virtualCards: Map<number, VirtualCard>;
@@ -14,12 +78,19 @@ export class MemStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.virtualCards = new Map();
-    this.transactions = new Map();
-    this.currentIds = { users: 1, virtualCards: 1, transactions: 1 };
+    // Initialize storage with mock data
+    this.users = new Map([[mockUser.id, mockUser]]);
+    this.virtualCards = new Map(mockVirtualCards.map(card => [card.id, card]));
+    this.transactions = new Map(mockTransactions.map(tx => [tx.id, tx]));
+
+    this.currentIds = {
+      users: Math.max(...this.users.keys()) + 1,
+      virtualCards: Math.max(...this.virtualCards.keys()) + 1,
+      transactions: Math.max(...this.transactions.keys()) + 1
+    };
+
     this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // 24h
+      checkPeriod: 86400000 // 24h
     });
   }
 
@@ -29,7 +100,7 @@ export class MemStorage implements IStorage {
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
-      (user) => user.username === username,
+      (user) => user.username === username
     );
   }
 
@@ -43,10 +114,10 @@ export class MemStorage implements IStorage {
   async updateUserBalance(userId: number, amount: string): Promise<User> {
     const user = await this.getUser(userId);
     if (!user) throw new Error("User not found");
-    
+
     const updatedUser = {
       ...user,
-      balance: amount,
+      balance: amount
     };
     this.users.set(userId, updatedUser);
     return updatedUser;
@@ -57,16 +128,16 @@ export class MemStorage implements IStorage {
     const virtualCard: VirtualCard = {
       ...card,
       id,
-      createdAt: new Date(),
+      createdAt: new Date()
     };
     this.virtualCards.set(id, virtualCard);
     return virtualCard;
   }
 
   async getVirtualCardsByUser(userId: number): Promise<VirtualCard[]> {
-    return Array.from(this.virtualCards.values()).filter(
-      (card) => card.userId === userId && card.isActive,
-    );
+    return Array.from(this.virtualCards.values())
+      .filter((card) => card.userId === userId && card.isActive)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async createTransaction(transaction: Omit<Transaction, "id" | "createdAt">): Promise<Transaction> {
@@ -74,7 +145,7 @@ export class MemStorage implements IStorage {
     const newTransaction: Transaction = {
       ...transaction,
       id,
-      createdAt: new Date(),
+      createdAt: new Date()
     };
     this.transactions.set(id, newTransaction);
     return newTransaction;
