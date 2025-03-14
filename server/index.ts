@@ -15,7 +15,7 @@ const ENV = process.env.NODE_ENV || "development";
 // Initialize Express
 const app = express();
 
-// CORS Middleware
+// Global CORS Middleware - must be applied first
 app.use(cors({
   origin: "https://cards2cash.netlify.app",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -23,7 +23,19 @@ app.use(cors({
   credentials: true,
 }));
 
-// Middleware for parsing JSON and URL-encoded data
+// Explicitly handle OPTIONS (preflight) requests to bypass auth
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Origin", "https://cards2cash.netlify.app");
+    res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
+    return res.sendStatus(204);
+  }
+  next();
+});
+
+// Parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -44,7 +56,7 @@ app.use(session({
 }));
 
 // Request Logger Middleware
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   let capturedResponse: any;
 
@@ -65,16 +77,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// Initialize Routes
+// Register API routes (including auth routes)
 (async () => {
   const server = await registerRoutes(app);
 
   // Global Error Handling Middleware
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    // Ensure error responses include the CORS header
+    res.header("Access-Control-Allow-Origin", "https://cards2cash.netlify.app");
     const status = err.status || err.statusCode || 500;
     res.status(status).json({ message: err.message || "Internal Server Error" });
     
-    if (ENV !== "production") console.error(err.stack || err);
+    if (ENV !== "production") {
+      console.error(err.stack || err);
+    }
   });
 
   // Set up Vite in development, or serve static files in production
