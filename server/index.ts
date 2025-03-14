@@ -1,79 +1,98 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
+import session from "express-session";
+import pgSession from "connect-pg-simple";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+const ENV = process.env.NODE_ENV || "development";
 
-// Add CORS middleware
+// CORS Middleware
 app.use(cors({
-  origin: "https://cards2cash.netlify.app", // Allow only your Netlify app to access
+  origin: "https://cards2cash.netlify.app",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // Include credentials like cookies
+  allowedHeaders: "Content-Type, Authorization",
+  credentials: true,
 }));
 
+// Handle Preflight Requests
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "https://cards2cash.netlify.app");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(204);
+});
+
+// Middleware for parsing JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Session Middleware
+app.use(session({
+  store: new (pgSession(session))({
+    conString: process.env.DATABASE_URL,
+  }),
+  secret: process.env.SESSION_SECRET || "secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: ENV === "production", // Secure cookies in production
+    httpOnly: true,
+    sameSite: "none",
+  },
+}));
+
+// Request Logger Middleware
 app.use((req, res, next) => {
   const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  let capturedResponse: Record<string, any> | undefined;
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+  const originalJson = res.json;
+  res.json = function (body, ...args) {
+    capturedResponse = body;
+    return originalJson.apply(res, [body, ...args]);
   };
 
   res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+    if (req.path.startsWith("/api")) {
+      let logMessage = `${req.method} ${req.path} ${res.statusCode} in ${Date.now() - start}ms`;
+      if (capturedResponse) {
+        logMessage += ` :: ${JSON.stringify(capturedResponse)}`;
       }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
+      log(logMessage.length > 80 ? logMessage.slice(0, 79) + "…" : logMessage);
     }
   });
 
   next();
 });
 
+// Initialize Routes
 (async () => {
   const server = await registerRoutes(app);
 
+  // Global Error Handling Middleware
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
+    res.status(status).json({ message: err.message || "Internal Server Error" });
+    console.error(err); // Log errors to console
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  // Set up Vite in development, or serve static files in production
+  if (ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  // Start Server
+  server.listen(PORT, "0.0.0.0", () => {
+    log(`Server running on port ${PORT} in ${ENV} mode`);
   });
 })();
