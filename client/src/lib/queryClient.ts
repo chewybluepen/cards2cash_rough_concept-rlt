@@ -9,9 +9,10 @@ async function throwIfResNotOk(res: Response) {
 
 export async function apiRequest(
   method: string,
-  url: string,
+  endpoint: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  const url = `https://cards2cash-rough-concept-rlt.onrender.com${endpoint}`;
   const res = await fetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
@@ -29,7 +30,8 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    const url = `https://cards2cash-rough-concept-rlt.onrender.com${queryKey[0] as string}`;
+    const res = await fetch(url, {
       credentials: "include",
     });
 
