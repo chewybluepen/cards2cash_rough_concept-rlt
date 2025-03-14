@@ -1,0 +1,200 @@
+Replit App Creation Prompt – Cards2Cash
+Overview & Purpose
+Develop a mobile app using Next.js and TypeScript called Cards2Cash that empowers users—especially those without access to traditional banking—to convert prepaid phone credit (from carriers like Digicel, GTT, etc.) into digital funds. Users can generate virtual cards for online shopping and perform international transactions with real-time currency conversion. The solution must be secure, intuitive, and provide an end-to-end demonstration—from user registration and prepaid code loading to virtual card generation, transaction management, and robust error handling.
+
+Core Integrations
+Currency Conversion API:
+Integrate with CurrencyAPI using the API key: cur_live_n6MwZsbGLs8nhgbJbMq3qPHdBXbB3P5fFyzVlAHb.
+Display live exchange rates on the conversion screen with explicit user confirmation before executing a conversion.
+Secure Data Storage:
+Store user data (transactions, generated cards, account details) securely in compliance with legal and regulatory standards.
+Global Support:
+Support all countries in the currency dropdown complete with corresponding flag icons.
+Detailed Screens, Flows, and Routes
+The project’s file structure defines every screen, route, and user action. The following list outlines all user-facing pages along with their functions and when each is invoked:
+
+Main Application Shell
+Home / Landing Page (app/page.tsx)
+Entry Point: Displays the primary dashboard after login with global navigation (layout from app/layout.tsx).
+Funds Management Flow
+Add Funds (app/add-funds/page.tsx)
+Function: Allows users to top up their account balance.
+User Action: Choose amount and payment method.
+Funds History (app/add-funds/history/page.tsx)
+Function: Displays a log of all previous funds additions.
+Sub-route:
+Loading State (app/add-funds/history/loading.tsx) – Provides UI feedback while data loads.
+Funds Rates (app/add-funds/rates/page.tsx)
+Function: Shows current conversion rates or fees.
+User Action: Review rates before confirming the addition.
+Bank & Payment Methods
+Bank Connection (app/bank-connection/page.tsx)
+Function: Walks users through linking their bank account.
+Sub-route:
+Loading State (app/bank-connection/loading.tsx) – Indicates progress during bank verification.
+Payment Methods (app/payment-methods/page.tsx)
+Function: Lists and manages user payment methods (cards, banks).
+Add Bank (app/payment-methods/add-bank/page.tsx)
+Function: Form to add a new bank account.
+Add Card (app/payment-methods/add-card/page.tsx)
+Function: Form to add a new debit/credit card.
+Currency Conversion
+Convert (app/convert/page.tsx)
+Function: Enables fund conversion between currencies (e.g., GYD to USD).
+User Action: Initiate conversion using live data.
+Currency Details (app/convert/currency-details/page.tsx)
+Function: Provides detailed conversion info (rates, fees, history).
+Conversion History (app/convert/history/page.tsx)
+Function: Lists previous conversion transactions.
+Sub-route:
+Loading State (app/convert/history/loading.tsx) – Displays while fetching history data.
+Dashboard & Analytics
+Dashboard (app/dashboard/page.tsx)
+Function: Shows account overview, current balance (GYD), quick actions, and recent transactions with visual cues.
+Monthly Growth (app/monthly-growth/page.tsx)
+Function: Visual analytics such as spending trends and income vs. expenses charts.
+Authentication & Security
+Biometric Authentication (app/biometric-auth/page.tsx)
+Function: Setup and verify biometric login options.
+Change Password (app/change-password/page.tsx)
+Function: Allows password updates.
+Forgot Password (app/forgot-password/page.tsx)
+Function: Initiates the password reset flow.
+Two-Factor Authentication (app/two-factor/page.tsx)
+Function: Guides 2FA setup for extra security.
+Verify OTP (app/verify-otp/page.tsx)
+Function: Provides interface for one-time password entry (e.g., during login or sensitive transactions).
+Facial Recognition Setup (app/facial-recognition-setup/page.tsx)
+Function: Walks users through facial recognition setup for authentication.
+Communication & Support
+Chat (app/chat/page.tsx)
+Function: Opens live support or community chat.
+Help (app/help/page.tsx)
+Function: Displays FAQs, guides, and support documentation.
+Sub-route:
+Loading State (app/help/loading.tsx) – Shown while fetching help content.
+Card Generation & Demo
+Generate Card (app/generate-card/page.tsx)
+Function: Enables virtual card generation (single-use or recurring) with details such as amount, expiration, and card type.
+Demo Success (app/demo-success/page.tsx)
+Function: Confirms successful demo transactions or setup.
+Profile & Settings
+Profile Overview (app/profile/page.tsx)
+Function: Displays personal details and account info.
+Avatar Update (app/profile/avatar/page.tsx)
+Function: Interface for changing the profile picture.
+Security Questions (app/profile/security-questions/page.tsx)
+Function: Allows users to set or update recovery questions.
+Settings (app/settings/page.tsx)
+Function: Hub for managing account preferences.
+Language (app/language/page.tsx)
+Function: Lets users choose their preferred app language.
+Spending Limits (app/spending-limits/page.tsx)
+Function: Allows users to set daily or transaction spending limits.
+Terms (app/terms/page.tsx)
+Function: Displays legal documents like Terms & Conditions.
+Notifications, Offers, Rewards & Transactions
+Notifications (app/notifications/page.tsx)
+Function: Lists alerts and notifications.
+Sub-route:
+Notification Detail (app/notifications/[id]/page.tsx) – Shows full details for a selected notification.
+Offers (app/offers/page.tsx)
+Function: Displays partner discounts and special offers.
+Sub-route:
+Offer Detail (app/offers/[id]/page.tsx) – Provides detailed information on a selected offer.
+Loading State (app/offers/loading.tsx) – Indicates progress while offers load.
+Rewards (app/rewards/page.tsx)
+Function: Shows loyalty rewards and benefits.
+Reward Detail (app/rewards/[id]/page.tsx)
+Function: Displays details for a specific reward.
+Tier Benefits (app/rewards/tier-benefits/page.tsx)
+Function: Lists benefits available at various reward tiers.
+Transactions (app/transactions/page.tsx)
+Function: Lists all past transactions with filtering options.
+Sub-routes:
+Transaction Detail (app/transactions/[id]/page.tsx) – In-depth view of an individual transaction.
+Loading State (app/transactions/loading.tsx) – Displays while transaction data is retrieved.
+Error Handling & Fallbacks
+Error Page (app/error.tsx)
+Function: Displays a generic error message for unexpected issues.
+Not Found (app/not-found.tsx)
+Function: Informs the user if the requested page does not exist.
+Underlying Components, Hooks & Utilities
+UI Components (in components/ui/):
+Elements include: Buttons, alerts, avatars, breadcrumbs, navigation menus, dialogs, toasts, etc.
+Purpose: Provide consistent interactive elements across all screens.
+Navigation & Animation Components:
+Files such as: components/bottom-navigation.tsx, components/enhanced-bottom-navigation.tsx, and various animations for page transitions and validations.
+Hooks & Utilities:
+Examples include: hooks/use-mobile.tsx, hooks/use-toast.ts, and libraries under lib/ for navigation and general utilities.
+Key Features & User Flows
+Authentication & User Onboarding
+Screens: Login, Sign Up, Forgot Password
+Flow Annotations:
+“User receives OTP via SMS”
+Support secure PIN entry, fingerprint, or biometric authentication.
+Clear error messages (e.g., “Invalid Code – please re-enter or request a new OTP”).
+Dashboard / Home Screen
+Features:
+Account Overview with current GYD balance, digital funds, and transaction history.
+Quick Access Panel for common actions: “Add Funds”, “Generate Card”, and “Currency Conversion.”
+Prepaid Credit Loader
+Features:
+Input prepaid voucher codes (e.g., Digicel, GTT).
+Offline Mode:
+“Offline Mode Syncing – transaction queued until network available.”
+Provide clear error messages for invalid codes or insufficient funds.
+Virtual Card Generator
+Flow:
+User selects card type (Visa, MasterCard, Amex) and confirms card generation.
+Integrate with trusted third-party processors and show status indicators for success or error.
+Transaction History & Analytics
+Features:
+Detailed log of deposits, card generations, currency conversions with filters (by date, amount, type).
+Visual charts/graphs for spending trends and a calendar view for tracking transactions.
+Spending Limit Alerts & Notifications
+Features:
+Custom daily spending limits and minimum balance alerts.
+Notifications with actionable suggestions (e.g., “Your spending is nearing your limit – consider topping up your balance”).
+Progress indicators and haptic feedback for successful actions and clear error modals when limits are breached.
+Currency Conversion
+Flow:
+Convert funds from GYD to USD (or other currencies) with live data from CurrencyAPI.
+Display exchange rates, conversion fees, and a confirmation prompt (annotate “User reviews exchange rate and confirms conversion”).
+Partner Discounts & Referral Program
+Features:
+Showcase partner offers with validity dates and terms.
+Referral system for users to share via phone or email.
+Annotations for referral steps (“User inputs referral code”, “Referral bonus credited after qualifying transaction”).
+Settings & Profile Management
+Screens: Profile Overview, Avatar Update, Security Questions, Settings, Language, Spending Limits, Terms
+Features:
+Update profile info, change PIN/password, set up biometric security, and manage linked accounts.
+Notification settings and legal documentation (Terms & Conditions, privacy policies).
+In-app AI Chatbot available 24/7 for FAQs and support.
+Design & UI/UX Guidelines
+Branding & Consistency:
+Use a trusted blue with complementary neutral tones across the app.
+Familiar iconography (home, transactions, settings) and clear labeling.
+Mobile Responsiveness:
+Responsive grid layouts, large readable fonts, and touch-friendly buttons.
+Visual Feedback & Animations:
+Use clear color cues (green for success, red for errors) and smooth animations (e.g., page transitions, validation animations).
+Modal overlays and dedicated error screens for actionable guidance.
+Navigation Optimization:
+Implement persistent bottom navigation and a quick access panel for common actions.
+Annotate key decision points (e.g., “User must re-enter payment info if transaction fails”).
+Final Demonstration Requirements
+Comprehensive Walkthrough:
+Implement every screen and flow—from account creation and prepaid code loading through virtual card generation, transaction review, currency conversion, and setting spending limits.
+Live API Integration:
+Clearly demonstrate API integration with CurrencyAPI using live data.
+Error Handling & Recovery:
+Robust error messages for each transaction step (e.g., “Insufficient Funds”, “Invalid Code”) with options to retry, cancel, or contact support.
+Annotated User Flows:
+Include in-app guidance at key decision points (e.g., “User receives OTP via SMS”, “User confirms conversion after reviewing rates”) informed by peer feedback.
+AI Enhancements & Offline Mode:
+Integrate an AI-powered chatbot for FAQs and transaction guidance.
+Allow offline prepaid code inputs and queue transactions until connectivity is restored.
+UI Consistency & Mobile Optimization:
+Ensure a consistent, responsive, and visually engaging experience across all devices.
