@@ -1,58 +1,55 @@
 import { useState } from "react";
-import { Sidebar } from "@/components/layout/sidebar";
-import { MobileNav } from "@/components/layout/mobile-nav";
+import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { VirtualCard } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, Plus } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Loader2, Plus, CreditCard } from "lucide-react";
+import { BottomNav } from "@/components/ui/bottom-nav";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { VirtualCard } from "@shared/schema";
+
+const generateCardSchema = z.object({
+  amount: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid amount format"),
+  currency: z.string(),
+});
 
 export default function VirtualCards() {
   const { toast } = useToast();
-  const [amount, setAmount] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const [showForm, setShowForm] = useState(false);
 
   const { data: cards, isLoading } = useQuery<VirtualCard[]>({
-    queryKey: ["/api/virtual-cards"],
+    queryKey: ["/api/cards"],
+  });
+
+  const form = useForm({
+    resolver: zodResolver(generateCardSchema),
+    defaultValues: {
+      amount: "",
+      currency: user?.currency || "GYD",
+    },
   });
 
   const generateCardMutation = useMutation({
-    mutationFn: async (amount: string) => {
-      const res = await apiRequest("POST", "/api/virtual-cards", {
-        cardNumber: Math.random().toString().slice(2, 18),
-        expiryDate: "12/24",
-        cvv: Math.random().toString().slice(2, 5),
-        amount,
-        currency: "USD",
-        active: true,
-      });
+    mutationFn: async (data: z.infer<typeof generateCardSchema>) => {
+      const res = await apiRequest("POST", "/api/cards/generate", data);
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/virtual-cards"] });
-      setIsOpen(false);
-      setAmount("");
+      queryClient.invalidateQueries({ queryKey: ["/api/cards"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       toast({
         title: "Success",
         description: "Virtual card generated successfully",
       });
+      setShowForm(false);
+      form.reset();
     },
     onError: (error: Error) => {
       toast({
@@ -63,117 +60,114 @@ export default function VirtualCards() {
     },
   });
 
-  const handleGenerate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!amount || isNaN(Number(amount))) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid amount",
-        variant: "destructive",
-      });
-      return;
-    }
-    generateCardMutation.mutate(amount);
+  const onSubmit = (data: z.infer<typeof generateCardSchema>) => {
+    generateCardMutation.mutate(data);
   };
 
+  if (!user) return null;
+
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar />
-      <div className="lg:pl-64">
-        <main className="p-8 pb-20 lg:pb-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Virtual Cards</h1>
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Generate Card
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Generate Virtual Card</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleGenerate} className="space-y-4">
-                  <div>
-                    <Label htmlFor="amount">Amount (USD)</Label>
-                    <Input
-                      id="amount"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
+    <div className="min-h-screen bg-background pb-16">
+      <div className="container p-4">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Virtual Cards</h1>
+          <Button onClick={() => setShowForm(!showForm)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Card
+          </Button>
+        </div>
+
+        {showForm && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Generate New Card</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Amount</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <Button
                     type="submit"
                     className="w-full"
                     disabled={generateCardMutation.isPending}
                   >
-                    {generateCardMutation.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Generate
+                    {generateCardMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    Generate Card
                   </Button>
                 </form>
-              </DialogContent>
-            </Dialog>
-          </div>
+              </Form>
+            </CardContent>
+          </Card>
+        )}
 
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {cards?.map((card) => (
-                <Card key={card.id}>
-                  <CardHeader>
-                    <CardTitle>Virtual Card</CardTitle>
-                    <CardDescription>
-                      {card.active ? "Active" : "Inactive"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div>
-                        <Label>Card Number</Label>
-                        <p className="font-mono">
-                          {card.cardNumber.match(/.{1,4}/g)?.join(" ")}
-                        </p>
-                      </div>
-                      <div className="flex gap-4">
-                        <div>
-                          <Label>Expiry</Label>
-                          <p>{card.expiryDate}</p>
-                        </div>
-                        <div>
-                          <Label>CVV</Label>
-                          <p>{card.cvv}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <Label>Amount</Label>
-                        <p className="font-medium">
-                          {parseFloat(card.amount.toString()).toLocaleString(
-                            "en-US",
-                            {
-                              style: "currency",
-                              currency: card.currency,
-                            }
-                          )}
-                        </p>
-                      </div>
+        {isLoading ? (
+          <div className="flex justify-center p-4">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : cards?.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center py-6">
+              <CreditCard className="h-12 w-12 text-muted-foreground mb-2" />
+              <p className="text-center text-muted-foreground">
+                No virtual cards yet. Generate your first card to get started.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {cards?.map((card) => (
+              <Card key={card.id} className="bg-primary text-primary-foreground">
+                <CardContent className="pt-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-sm opacity-90">Virtual Card</p>
+                      <p className="font-mono text-lg">
+                        **** **** **** {card.cardNumber.slice(-4)}
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </main>
+                    <div className="text-right">
+                      <p className="text-sm opacity-90">Balance</p>
+                      <p className="font-bold">
+                        {card.currency} {Number(card.amount).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm opacity-90">
+                    <div>
+                      <p>Expires</p>
+                      <p>{card.expiryDate}</p>
+                    </div>
+                    <div className="text-right">
+                      <p>CVV</p>
+                      <p>***</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
-      <MobileNav />
+      <BottomNav />
     </div>
   );
 }
