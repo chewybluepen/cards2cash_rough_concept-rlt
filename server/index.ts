@@ -15,7 +15,7 @@ const ENV = process.env.NODE_ENV || "development";
 // Initialize Express
 const app = express();
 
-// Global CORS Middleware - Disable restrictions by allowing all origins
+// Global CORS Middleware - disable restrictions by allowing all origins
 app.use(cors());
 
 // Explicitly handle OPTIONS (preflight) requests for all routes
@@ -40,7 +40,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: ENV === "production", // Secure cookies in production
+    secure: ENV === "production", // secure cookies in production
     httpOnly: true,
     sameSite: "none",
   },
@@ -72,7 +72,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  // Global Error Handling Middleware - Ensure errors include CORS headers
+  // Global Error Handling Middleware - ensure errors include CORS headers
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.header("Access-Control-Allow-Origin", "*");
     const status = err.status || err.statusCode || 500;
@@ -81,6 +81,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     if (ENV !== "production") {
       console.error(err.stack || err);
     }
+  });
+
+  // Final middleware to force CORS header on every response
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    next();
   });
 
   // Set up Vite in development, or serve static files in production
