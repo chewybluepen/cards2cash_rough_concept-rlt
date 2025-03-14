@@ -12,6 +12,7 @@ import Convert from "@/pages/convert";
 import Transactions from "@/pages/transactions";
 import MonthlyGrowth from "@/pages/monthly-growth";
 import Help from "@/pages/help";
+import BankConnection from "@/pages/bank-connection";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <ProtectedRoute path="/transactions" component={Transactions} />
       <ProtectedRoute path="/monthly-growth" component={MonthlyGrowth} />
       <ProtectedRoute path="/help" component={Help} />
+      <ProtectedRoute path="/bank-connection" component={BankConnection} />
       <Route component={NotFound} />
     </Switch>
   );
