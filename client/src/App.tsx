@@ -8,6 +8,7 @@ import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import AddFunds from "@/pages/add-funds";
 import VirtualCards from "@/pages/virtual-cards";
+import Convert from "@/pages/convert";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
       <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/add-funds" component={AddFunds} />
       <ProtectedRoute path="/cards" component={VirtualCards} />
+      <ProtectedRoute path="/convert" component={Convert} />
       <Route component={NotFound} />
     </Switch>
   );
