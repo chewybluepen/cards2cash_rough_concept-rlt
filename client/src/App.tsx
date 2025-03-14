@@ -11,6 +11,7 @@ import VirtualCards from "@/pages/virtual-cards";
 import Convert from "@/pages/convert";
 import Transactions from "@/pages/transactions";
 import MonthlyGrowth from "@/pages/monthly-growth";
+import Help from "@/pages/help";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -23,6 +24,7 @@ function Router() {
       <ProtectedRoute path="/convert" component={Convert} />
       <ProtectedRoute path="/transactions" component={Transactions} />
       <ProtectedRoute path="/monthly-growth" component={MonthlyGrowth} />
+      <ProtectedRoute path="/help" component={Help} />
       <Route component={NotFound} />
     </Switch>
   );
