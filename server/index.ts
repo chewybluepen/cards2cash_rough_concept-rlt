@@ -1,8 +1,17 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Add CORS middleware
+app.use(cors({
+  origin: "https://cards2cash.netlify.app", // Allow only your Netlify app to access
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // Include credentials like cookies
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
