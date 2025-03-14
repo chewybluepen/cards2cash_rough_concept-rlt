@@ -15,24 +15,15 @@ const ENV = process.env.NODE_ENV || "development";
 // Initialize Express
 const app = express();
 
-// Global CORS Middleware - must be applied first
-app.use(cors({
-  origin: "https://cards2cash.netlify.app",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: "Content-Type, Authorization",
-  credentials: true,
-}));
+// Global CORS Middleware - Disable restrictions by allowing all origins
+app.use(cors());
 
-// Explicitly handle OPTIONS (preflight) requests to bypass auth
-app.use((req: Request, res: Response, next: NextFunction) => {
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Origin", "https://cards2cash.netlify.app");
-    res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
-    return res.sendStatus(204);
-  }
-  next();
+// Explicitly handle OPTIONS (preflight) requests for all routes
+app.options('*', (req: Request, res: Response) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.sendStatus(204);
 });
 
 // Parsing middleware
@@ -81,10 +72,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  // Global Error Handling Middleware
+  // Global Error Handling Middleware - Ensure errors include CORS headers
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    // Ensure error responses include the CORS header
-    res.header("Access-Control-Allow-Origin", "https://cards2cash.netlify.app");
+    res.header("Access-Control-Allow-Origin", "*");
     const status = err.status || err.statusCode || 500;
     res.status(status).json({ message: err.message || "Internal Server Error" });
     
