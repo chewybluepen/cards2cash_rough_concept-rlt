@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Wallet, CreditCard, ArrowRightLeft, History, LogOut } from "lucide-react";
+import { Home, Wallet, CreditCard, ArrowRightLeft, History, TrendingUp, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "./button";
 
@@ -13,6 +13,7 @@ export function BottomNav() {
     { href: "/cards", icon: CreditCard, label: "Cards" },
     { href: "/convert", icon: ArrowRightLeft, label: "Convert" },
     { href: "/transactions", icon: History, label: "History" },
+    { href: "/monthly-growth", icon: TrendingUp, label: "Growth" },
   ];
 
   return (
